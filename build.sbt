@@ -3,7 +3,7 @@ val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.3.0")
 lazy val `scalajs-bundler-linker` =
     project
     .settings(
-      scalaVersion := "2.12.11",
+      scalaVersion := "2.12.14",
       libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalaJSVersion
     )
 
@@ -69,7 +69,7 @@ val manual =
     .enablePlugins(OrnatePlugin)
     .settings(noPublishSettings: _*)
     .settings(
-      scalaVersion := "2.12.11",
+      scalaVersion := "2.12.14",
       ornateSourceDir := Some(sourceDirectory.value / "ornate"),
       ornateTargetDir := Some(ornateTarget.value),
       ornateSettings := Map("version" -> version.value),
