@@ -18,6 +18,7 @@ val `sbt-scalajs-bundler` =
       addSbtPlugin("org.scala-js" % "sbt-scalajs" % scalaJSVersion),
       buildInfoKeys := Seq[BuildInfoKey](version),
       buildInfoPackage := "scalajsbundler.sbtplugin.internal",
+      crossSbtVersions := List("1.2.8"),
       // When supported, add: buildInfoOptions += sbtbuildinfo.BuildInfoOption.PackagePrivate
       scriptedDependencies := {
         scriptedDependencies.value
@@ -26,14 +27,12 @@ val `sbt-scalajs-bundler` =
       },
     )
 
+// sbt-web-scalajs does not support sbt 1.2.x
 val `sbt-web-scalajs-bundler` =
   project
     .enablePlugins(SbtPlugin)
     .settings(commonSettings)
     .settings(
-      // sbt-web-scalajs does not support sbt 1.2.x
-      crossSbtVersions := List("1.3.0"),
-      sbtVersion in pluginCrossBuild := "1.3.0",
       scriptedDependencies := {
         scriptedDependencies.value
         publishLocal.value
@@ -125,8 +124,6 @@ lazy val commonSettings = List(
     "-Dsbt.execute.extrachecks=true" // Avoid any deadlocks.
   ),
   scriptedBufferLog := false,
-  crossSbtVersions := List("1.2.8"),
-  sbtVersion in pluginCrossBuild := "1.2.8",
 )
 
 //https://github.com/sbt/sbt/issues/6571
