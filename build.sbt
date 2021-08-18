@@ -20,9 +20,9 @@ val `sbt-scalajs-bundler` =
       buildInfoPackage := "scalajsbundler.sbtplugin.internal",
       // When supported, add: buildInfoOptions += sbtbuildinfo.BuildInfoOption.PackagePrivate
       scriptedDependencies := {
-        val () = scriptedDependencies.value
-        val () = publishLocal.value
-        val () = (`scalajs-bundler-linker` / publishLocal).value
+        scriptedDependencies.value
+        publishLocal.value
+        (`scalajs-bundler-linker` / publishLocal).value
       },
     )
 
@@ -35,10 +35,10 @@ val `sbt-web-scalajs-bundler` =
       crossSbtVersions := List("1.3.0"),
       sbtVersion in pluginCrossBuild := "1.3.0",
       scriptedDependencies := {
-        val () = scriptedDependencies.value
-        val () = publishLocal.value
-        val () = (`sbt-scalajs-bundler` / publishLocal).value
-        val () = (`scalajs-bundler-linker` / publishLocal).value
+        scriptedDependencies.value
+        publishLocal.value
+        (`sbt-scalajs-bundler` / publishLocal).value
+        (`scalajs-bundler-linker` / publishLocal).value
       },
       description := "Module bundler for Scala.js projects (integration with sbt-web-scalajs)",
       addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.1.0")
