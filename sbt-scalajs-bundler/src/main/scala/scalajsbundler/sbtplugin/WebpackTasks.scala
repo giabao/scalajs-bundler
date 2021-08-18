@@ -21,18 +21,18 @@ object WebpackTasks {
       assert(ensureModuleKindIsCommonJSModule.value)
       val cacheLocation = streams.value.cacheDirectory / s"${stage.key.label}-webpack"
       val generatedWebpackConfigFile =
-        (scalaJSBundlerWebpackConfig in stage).value
-      val emitSourceMaps = (finallyEmitSourceMaps in stage).value
-      val customWebpackConfigFile = (webpackConfigFile in stage).value
+        (stage / scalaJSBundlerWebpackConfig).value
+      val emitSourceMaps = (stage / finallyEmitSourceMaps).value
+      val customWebpackConfigFile = (stage / webpackConfigFile).value
       val webpackResourceFiles = webpackResources.value.get
       val entriesList = entry(stage).value
       val targetDir = npmUpdate.value
       val log = streams.value.log
-      val monitoredFiles = (webpackMonitoredFiles in stage).value
-      val extraArgs = (webpackExtraArgs in stage).value
-      val nodeArgs = (webpackNodeArgs in stage).value
+      val monitoredFiles = (stage / webpackMonitoredFiles).value
+      val extraArgs = (stage / webpackExtraArgs).value
+      val nodeArgs = (stage / webpackNodeArgs).value
       val webpackMode =
-        Webpack.WebpackMode.fromBooleanProductionMode((scalaJSLinkerConfig in stage).value.semantics.productionMode)
+        Webpack.WebpackMode.fromBooleanProductionMode((stage / scalaJSLinkerConfig).value.semantics.productionMode)
       val devServerPort = webpackDevServerPort.value
 
       val cachedActionFunction =

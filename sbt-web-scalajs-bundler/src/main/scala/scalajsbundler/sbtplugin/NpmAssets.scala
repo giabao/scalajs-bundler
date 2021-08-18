@@ -19,7 +19,7 @@ object NpmAssets {
     */
   def ofProject(project: ProjectReference)(assets: File => PathFinder): Def.Initialize[Task[Seq[PathMapping]]] =
     Def.task {
-      val nodeModules = (npmUpdate in (project, Compile)).value / "node_modules"
+      val nodeModules = (project / Compile / npmUpdate).value / "node_modules"
       assets(nodeModules).pair(Path.relativeTo(nodeModules))
     }
 

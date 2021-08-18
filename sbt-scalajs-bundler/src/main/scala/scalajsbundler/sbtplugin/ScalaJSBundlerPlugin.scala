@@ -20,27 +20,27 @@ import scalajsbundler.util.{JSON, ScalaJSNativeLibraries}
   * The [[ScalaJSBundlerPlugin.autoImport autoImport]] member documents the keys provided by this plugin. Besides these keys, the
   * following existing keys also control the plugin:
   *
-  * == `version in webpack` ==
+  * == `webpack / version` ==
   *
   * Version of webpack to use. Example:
   *
   * {{{
-  *   version in webpack := "3.5.5"
+  *   webpack / version := "3.5.5"
   * }}}
   *
-  * == `version in installJsdom` ==
+  * == `installJsdom / version` ==
   *
   * Version of jsdom to use.
   *
-  * == `version in startWebpackDevServer` ==
+  * == `startWebpackDevServer / version` ==
   *
   * Version of webpack-dev-server to use.
   *
   * {{{
-  *   version in startWebpackDevServer := "2.11.1"
+  *   startWebpackDevServer / version := "2.11.1"
   * }}}
   *
-  * == `crossTarget in npmUpdate` ==
+  * == `npmUpdate / crossTarget` ==
   *
   * The directory in which NPM dependencies will be fetched, and where all the .js files
   * will be generated. The directory is different according to the current `Configuration`
@@ -103,7 +103,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       *
       * {{{
       *   myCustomTask := {
-      *     val npmDirectory = (npmInstallDependencies in Compile).value
+      *     val npmDirectory = (Compile / npmInstallDependencies).value
       *     doSomething(npmDirectory / "node_modules" / "some-package")
       *   }
       * }}}
@@ -139,7 +139,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       * You can use [semver](https://docs.npmjs.com/misc/semver) versions:
       *
       * {{{
-      *   npmDependencies in Compile += "uuid" -> "~3.0.0"
+      *   Compile / npmDependencies += "uuid" -> "~3.0.0"
       * }}}
       *
       * Note that this key must be scoped by a `Configuration` (either `Compile` or `Test`).
@@ -160,7 +160,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       * package. Example:
       *
       * {{{
-      *   npmResolutions in Compile := Map("react" -> "15.4.1")
+      *   Compile / npmResolutions := Map("react" -> "15.4.1")
       * }}}
       *
       * If several Scala.js projects depend on different versions of `react`, the version `15.4.1`
@@ -185,7 +185,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       *
       * {{{
       *   import scalajsbundler.util.JSON._
-      *   additionalNpmConfig in Compile := Map(
+      *   Compile / additionalNpmConfig := Map(
       *     "name"        -> str(name.value),
       *     "version"     -> str(version.value),
       *     "description" -> str("Awesome ScalaJS project..."),
@@ -245,14 +245,14 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       * Or, in an sbt build definition:
       *
       * {{{
-      *   webpack in (Compile, fastOptJS)
+      *   Compile / fastOptJS / webpack
       * }}}
       *
       * Note that to scope the task to a different project than the “current” sbt project, you
       * have to write the following:
       *
       * {{{
-      *   webpack in (projectRef, Compile, fastOptJS in projectRef)
+      *   projectRef / Compile / fastOptJS / webpack
       * }}}
       *
       * The task returns the produced bundles.
@@ -283,7 +283,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       * configuration file, but you can supply your own file via this setting. Example of use:
       *
       * {{{
-      *   webpackConfigFile in fullOptJS := Some(baseDirectory.value / "my.dev.webpack.config.js")
+      *   fullOptJS / webpackConfigFile := Some(baseDirectory.value / "my.dev.webpack.config.js")
       * }}}
       *
       * You can find more insights on how to write a custom configuration file in the
@@ -318,7 +318,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       * of use:
       *
       * {{{
-      *   webpackEmitSourceMaps in (Compile, fullOptJS) := false
+      *   Compile / fullOptJS / webpackEmitSourceMaps := false
       * }}}
       *
       * By default, this setting is undefined and scalajs-bundler fallbacks to Scala.js’ `sourceMap`
@@ -489,7 +489,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
     /**
       * Locally install jsdom.
       *
-      * You can set the jsdom package version to install with the key `version in installJsdom`.
+      * You can set the jsdom package version to install with the key `installJsdom / version`.
       *
       * Returns the installation directory.
       *
@@ -553,20 +553,20 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
 
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
 
-    version in webpack := "5.50.0",
+    webpack / version := "5.50.0",
 
     webpackCliVersion := "4.7.2",
 
-    version in startWebpackDevServer := "3.11.2",
+    startWebpackDevServer / version := "3.11.2",
 
-    version in installJsdom := "9.9.0",
+    installJsdom / version := "9.9.0",
 
     webpackConfigFile := None,
 
     webpackResources := baseDirectory.value * "*.js",
 
     // Include the manifest in the produced artifact
-    (products in Compile) := (products in Compile).dependsOn(scalaJSBundlerManifest).value,
+    (Compile / products) := (Compile / products).dependsOn(scalaJSBundlerManifest).value,
 
     useYarn := false,
 
@@ -581,7 +581,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
     // difference between configurations/stages. This way the
     // API user can modify it just once.
     webpackMonitoredDirectories := Seq(),
-    (includeFilter in webpackMonitoredFiles) := AllPassFilter,
+    webpackMonitoredFiles / includeFilter := AllPassFilter,
     webpackExtraArgs := Seq.empty,
     webpackNodeArgs := Seq.empty,
 
@@ -595,8 +595,8 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
     // We can only have one server per project - for simplicity
     webpackDevServer := new WebpackDevServer(),
 
-    (onLoad in Global) := {
-      (onLoad in Global).value.compose(
+    (Global / onLoad) := {
+      (Global / onLoad).value.compose(
         _.addExitHook {
           webpackDevServer.value.stop()
         }
@@ -608,7 +608,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       val baseDir = baseDirectory.value
       val jsdomDir = installDir / "node_modules" / "jsdom"
       val log = streams.value.log
-      val jsdomVersion = (version in installJsdom).value
+      val jsdomVersion = (installJsdom / version).value
       if (!jsdomDir.exists()) {
         log.info(s"Installing jsdom in ${installDir.absolutePath}")
         IO.createDirectory(installDir)
@@ -642,7 +642,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
 
       npmInstallDependencies := NpmUpdateTasks.npmInstallDependencies(
         baseDirectory.value,
-        (crossTarget in npmUpdate).value,
+        (npmUpdate / crossTarget).value,
         scalaJSBundlerPackageJson.value.file,
         useYarn.value,
         streams.value,
@@ -650,28 +650,28 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
         yarnExtraArgs.value),
 
       npmInstallJSResources := NpmUpdateTasks.npmInstallJSResources(
-        (crossTarget in npmUpdate).value,
+        (npmUpdate / crossTarget).value,
         ScalaJSNativeLibraries(fullClasspath.value),
         jsSourceDirectories.value,
         streams.value),
 
       scalaJSBundlerPackageJson :=
         PackageJsonTasks.writePackageJson(
-          (crossTarget in npmUpdate).value,
+          (npmUpdate / crossTarget).value,
           npmDependencies.value,
           npmDevDependencies.value,
           npmResolutions.value,
           additionalNpmConfig.value,
           dependencyClasspath.value,
           configuration.value,
-          (version in webpack).value,
-          (version in startWebpackDevServer).value,
+          (webpack / version).value,
+          (startWebpackDevServer / version).value,
           webpackCliVersion.value,
           streams.value
         ),
 
 
-      crossTarget in npmUpdate := {
+      npmUpdate / crossTarget := {
         crossTarget.value / "scalajs-bundler" / (if (configuration.value == Compile) "main" else "test")
       },
 
@@ -685,11 +685,11 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
 
   private lazy val testSettings: Seq[Setting[_]] =
     Def.settings(
-      npmDependencies ++= (npmDependencies in Compile).value,
+      npmDependencies ++= (Compile / npmDependencies).value,
 
-      npmDevDependencies ++= (npmDevDependencies in Compile).value,
+      npmDevDependencies ++= (Compile / npmDevDependencies).value,
 
-      jsSourceDirectories ++= (jsSourceDirectories in Compile).value,
+      jsSourceDirectories ++= (Compile / jsSourceDirectories).value,
 
       requireJsDomEnv := false,
 
@@ -706,18 +706,18 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
 
     Seq(
       // Ask Scala.js to output its result in our target directory
-      crossTarget in stageTask := (crossTarget in npmUpdate).value,
+      stageTask / crossTarget := (npmUpdate / crossTarget).value,
 
-      finallyEmitSourceMaps in stageTask := {
-        (webpackEmitSourceMaps in stageTask).?.value
-          .getOrElse((scalaJSLinkerConfig in stageTask).value.sourceMap)
+      stageTask / finallyEmitSourceMaps := {
+        (stageTask / webpackEmitSourceMaps).?.value
+          .getOrElse((stageTask / scalaJSLinkerConfig).value.sourceMap)
       },
 
       // Override Scala.js’ relativeSourceMaps in case we have to emit source maps in the webpack task, because it does not work with absolute source maps
-      scalaJSLinkerConfig in stageTask := {
-        val prev = (scalaJSLinkerConfig in stageTask).value
-        val relSourceMaps = (webpackEmitSourceMaps in stageTask).?.value.getOrElse(prev.sourceMap)
-        val relSourceMapBase = (artifactPath in stageTask).value.toURI
+      stageTask / scalaJSLinkerConfig := {
+        val prev = (stageTask / scalaJSLinkerConfig).value
+        val relSourceMaps = (stageTask / webpackEmitSourceMaps).?.value.getOrElse(prev.sourceMap)
+        val relSourceMapBase = (stageTask / artifactPath).value.toURI
         if (!relSourceMaps) {
           prev
         } else {
@@ -725,13 +725,13 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
         }
       },
 
-      scalaJSBundlerWebpackConfig in stageTask := BundlerFile.WebpackConfig(
+      stageTask / scalaJSBundlerWebpackConfig := BundlerFile.WebpackConfig(
         WebpackTasks.entry(stageTask).value,
         npmUpdate.value / "scalajs.webpack.config.js"
       ),
 
-      webpack in stageTask := Def.taskDyn {
-        (webpackBundlingMode in stageTask).value match {
+      stageTask / webpack := Def.taskDyn {
+        (stageTask / webpackBundlingMode).value match {
           case scalajsbundler.BundlingMode.Application =>
             WebpackTasks.webpack(stageTask)
           case mode: scalajsbundler.BundlingMode.LibraryOnly =>
@@ -741,13 +741,13 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
         }
       }.value,
 
-      webpackMonitoredFiles in stageTask := {
-        val generatedWebpackConfigFile = (scalaJSBundlerWebpackConfig in stageTask).value
-        val customWebpackConfigFile = (webpackConfigFile in stageTask).value
+      stageTask / webpackMonitoredFiles := {
+        val generatedWebpackConfigFile = (stageTask / scalaJSBundlerWebpackConfig).value
+        val customWebpackConfigFile = (stageTask / webpackConfigFile).value
         val packageJsonFile = scalaJSBundlerPackageJson.value
         val entry = WebpackTasks.entry(stageTask).value
-        val filter = (includeFilter in webpackMonitoredFiles).value
-        val dirs = (webpackMonitoredDirectories in stageTask).value
+        val filter = (webpackMonitoredFiles / includeFilter).value
+        val dirs = (stageTask / webpackMonitoredDirectories).value
 
         val generatedFiles: Seq[File] = Seq(
           packageJsonFile.file,
@@ -763,13 +763,13 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       },
 
       // webpack-dev-server wiring
-      startWebpackDevServer in stageTask := Def.task {
-        val extraArgs = (webpackDevServerExtraArgs in stageTask).value
+      stageTask / startWebpackDevServer := Def.task {
+        val extraArgs = (stageTask / webpackDevServerExtraArgs).value
 
         // This duplicates file layout logic from `Webpack`
-        val targetDir = (npmUpdate in stageTask).value
-        val customConfigOption = (webpackConfigFile in stageTask).value
-        val generatedConfig = (scalaJSBundlerWebpackConfig in stageTask).value
+        val targetDir = (stageTask / npmUpdate).value
+        val customConfigOption = (stageTask / webpackConfigFile).value
+        val generatedConfig = (stageTask / scalaJSBundlerWebpackConfig).value
 
         val config = customConfigOption
           .map(Webpack.copyCustomWebpackConfigFiles(targetDir, webpackResources.value.get))
@@ -780,7 +780,7 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
 
         // Server instance is project-level
         val server = webpackDevServer.value
-        val logger = (streams in stageTask).value.log
+        val logger = (stageTask / streams).value.log
         val globalLogger = state.value.globalLogging.full
 
         server.start(
@@ -793,14 +793,14 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
       }.dependsOn(
         // We need to execute the full webpack task once, since it generates
         // the required config file
-        (webpack in stageTask),
+        (stageTask / webpack),
 
         npmUpdate
       ).value,
 
       // Stops the global server instance, but is defined on stage
       // level to match `startWebpackDevServer`
-      stopWebpackDevServer in stageTask := {
+      stageTask / stopWebpackDevServer := {
         webpackDevServer.value.stop()
       }
     )
@@ -813,12 +813,12 @@ object ScalaJSBundlerPlugin extends AutoPlugin {
     Def.task {
       NpmDependencies.writeManifest(
         NpmDependencies(
-          (npmDependencies in Compile).value.to[List],
-          (npmDependencies in Test).value.to[List],
-          (npmDevDependencies in Compile).value.to[List],
-          (npmDevDependencies in Test).value.to[List]
+          (Compile / npmDependencies).value.to[List],
+          (Test / npmDependencies).value.to[List],
+          (Compile / npmDevDependencies).value.to[List],
+          (Test / npmDevDependencies).value.to[List]
         ),
-        (classDirectory in Compile).value
+        (Compile / classDirectory).value
       )
     }
 

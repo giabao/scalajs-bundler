@@ -35,11 +35,11 @@ private[sbtplugin] object Settings {
   // Settings that must be applied in Global
   val globalSettings: Seq[Setting[_]] =
     Def.settings(
-      fullClasspath in scalaJSLinkerImpl := {
+      scalaJSLinkerImpl / fullClasspath := {
         val s = streams.value
         val log = s.log
         val retrieveDir = s.cacheDirectory / "scalajs-bundler-linker"
-        val lm = (dependencyResolution in scalaJSLinkerImpl).value
+        val lm = (scalaJSLinkerImpl / dependencyResolution).value
         val dummyModuleID =
           "ch.epfl.scala" % "scalajs-bundler-linker-and-scalajs-linker_2.12" % s"${BuildInfo.version}/$scalaJSVersion"
         val dependencies = Vector(
@@ -54,7 +54,7 @@ private[sbtplugin] object Settings {
       },
 
       scalaJSLinkerImpl := {
-        val cp = (fullClasspath in scalaJSLinkerImpl).value
+        val cp = (scalaJSLinkerImpl / fullClasspath).value
         scalaJSLinkerImplBox.value.ensure {
           new BundlerLinkerImpl(LinkerImpl.reflect(Attributed.data(cp)))
         }
@@ -68,10 +68,10 @@ private[sbtplugin] object Settings {
       s"entrypoints-${stage.toString.toLowerCase}.txt"
 
     Def.settings(
-      scalaJSLinker in legacyKey := {
-        val config = (scalaJSLinkerConfig in key).value
-        val box = (scalaJSLinkerBox in key).value
-        val linkerImpl = (scalaJSLinkerImpl in key).value
+      legacyKey / scalaJSLinker := {
+        val config = (key / scalaJSLinkerConfig).value
+        val box = (key / scalaJSLinkerBox).value
+        val linkerImpl = (key / scalaJSLinkerImpl).value
         val entryPointOutputFile = crossTarget.value / entryPointOutputFileName
 
         box.ensure {
@@ -80,7 +80,7 @@ private[sbtplugin] object Settings {
         }
       },
 
-      scalaJSBundlerImportedModules in legacyKey := {
+      legacyKey / scalaJSBundlerImportedModules := {
         val _ = legacyKey.value
         val entryPointOutputFile = crossTarget.value / entryPointOutputFileName
         val lines = Files.readAllLines(entryPointOutputFile.toPath, StandardCharsets.UTF_8)
@@ -167,10 +167,10 @@ private[sbtplugin] object Settings {
               val targetDir = npmUpdate.value
               val sjsOutputName = sjsOutput.name.stripSuffix(".js")
               val bundle = targetDir / s"$sjsOutputName-bundle.js"
-              val webpackVersion = (version in webpack).value
+              val webpackVersion = (webpack / version).value
 
-              val customWebpackConfigFile = (webpackConfigFile in Test).value
-              val nodeArgs = (webpackNodeArgs in Test).value
+              val customWebpackConfigFile = (Test / webpackConfigFile).value
+              val nodeArgs = (Test / webpackNodeArgs).value
 
               val writeTestBundleFunction =
                 FileFunction.cached(

@@ -15,7 +15,7 @@ object LibraryTasks {
     : Def.Initialize[Task[BundlerFile.EntryPoint]] =
     Def.task {
       val s = streams.value
-      val importedModules = (scalaJSBundlerImportedModules in stage).value
+      val importedModules = (stage / scalaJSBundlerImportedModules).value
       val entry = WebpackTasks.entry(stage).value
       val cacheLocation = streams.value.cacheDirectory / s"${stage.key.label}-webpack-entrypoint"
       val entryPointFile = entry.asEntryPoint
@@ -30,7 +30,7 @@ object LibraryTasks {
             s.log
         ))
       entryPointFile
-    }.dependsOn(npmUpdate in stage)
+    }.dependsOn(stage / npmUpdate)
 
   private[sbtplugin] def bundle(
       stage: TaskKey[Attributed[File]],
@@ -38,21 +38,21 @@ object LibraryTasks {
     Def.task {
       assert(ensureModuleKindIsCommonJSModule.value)
       val log = streams.value.log
-      val emitSourceMaps = (finallyEmitSourceMaps in stage).value
-      val customWebpackConfigFile = (webpackConfigFile in stage).value
+      val emitSourceMaps = (stage / finallyEmitSourceMaps).value
+      val customWebpackConfigFile = (stage / webpackConfigFile).value
       val generatedWebpackConfigFile =
-        (scalaJSBundlerWebpackConfig in stage).value
-      val compileResources = (resources in Compile).value
-      val webpackResourceFiles = (webpackResources in stage).value.get
+        (stage / scalaJSBundlerWebpackConfig).value
+      val compileResources = (Compile / resources).value
+      val webpackResourceFiles = (stage / webpackResources).value.get
       val entryPointFile = entryPoint(stage).value
       val monitoredFiles = customWebpackConfigFile.toSeq ++
         Seq(generatedWebpackConfigFile.file, entryPointFile.file) ++
         webpackResourceFiles ++ compileResources
       val cacheLocation = streams.value.cacheDirectory / s"${stage.key.label}-webpack-libraries"
-      val extraArgs = (webpackExtraArgs in stage).value
-      val nodeArgs = (webpackNodeArgs in stage).value
+      val extraArgs = (stage / webpackExtraArgs).value
+      val nodeArgs = (stage / webpackNodeArgs).value
       val webpackMode =
-        Webpack.WebpackMode.fromBooleanProductionMode((scalaJSLinkerConfig in stage).value.semantics.productionMode)
+        Webpack.WebpackMode.fromBooleanProductionMode((stage / scalaJSLinkerConfig).value.semantics.productionMode)
       val devServerPort = webpackDevServerPort.value
 
       val cachedActionFunction =
@@ -104,7 +104,7 @@ object LibraryTasks {
       val targetDir = npmUpdate.value
       val entry = WebpackTasks.entry(stage).value
       val library = bundle(stage, mode).value
-      val emitSourceMaps = (finallyEmitSourceMaps in stage).value
+      val emitSourceMaps = (stage / finallyEmitSourceMaps).value
       val log = streams.value.log
       val filesToMonitor = Seq(entry.file, library.file)
 

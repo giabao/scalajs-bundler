@@ -53,7 +53,7 @@ object WebScalaJSBundlerPlugin extends AutoPlugin {
     val projectRefs = scalaJSProjects.value.map(Project.projectToRef)
     projectRefs.map { project =>
       Def.setting {
-        (resourceDirectories in Compile in project).value
+        (project / Compile / resourceDirectories).value
       }
     }.foldLeft(Def.setting(Seq.empty[File]))((acc, resourceDirectories) =>
       Def.setting(acc.value ++ resourceDirectories.value)
@@ -69,14 +69,14 @@ object WebScalaJSBundlerPlugin extends AutoPlugin {
           projects
             .map { project =>
               Def.settingDyn {
-                val sjsStage = (scalaJSStage in project).value match {
+                val sjsStage = (project / scalaJSStage).value match {
                   case Stage.FastOpt => fastOptJS
                   case Stage.FullOpt => fullOptJS
                 }
                 Def.task {
-                  val files = (webpack in (project, Compile, sjsStage)).value
-                  val clientTarget = (npmUpdate in (project, Compile)).value
-                  val sourceMapsEnabled = (finallyEmitSourceMaps in (project, Compile, sjsStage)).value
+                  val files = (project / Compile / sjsStage / webpack).value
+                  val clientTarget = (project / Compile / npmUpdate).value
+                  val sourceMapsEnabled = (project / Compile / sjsStage / finallyEmitSourceMaps).value
                   files.map(_.data).pair(Path.relativeTo(clientTarget)).map((_, sourceMapsEnabled))
                 }
               }
@@ -97,8 +97,8 @@ object WebScalaJSBundlerPlugin extends AutoPlugin {
   val pipelineStage: Def.Initialize[Task[Pipeline.Stage]] =
     Def.taskDyn {
       val npmAssetsMappings = npmAssets.value
-      val include = (includeFilter in scalaJSPipeline).value
-      val exclude = (excludeFilter in scalaJSPipeline).value
+      val include = (scalaJSPipeline / includeFilter).value
+      val exclude = (scalaJSPipeline / excludeFilter).value
       val bundleMappings = bundlesWithSourceMaps.value
       val sourcemapScalaFiles = WebScalaJS.sourcemapScalaFiles.value
       Def.task { mappings: Seq[PathMapping] =>
