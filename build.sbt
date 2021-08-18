@@ -1,14 +1,14 @@
 val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.3.0")
 
 lazy val `scalajs-bundler-linker` =
-  project.in(file("scalajs-bundler-linker"))
+    project
     .settings(
       scalaVersion := "2.12.11",
       libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalaJSVersion
     )
 
 val `sbt-scalajs-bundler` =
-  project.in(file("sbt-scalajs-bundler"))
+  project
     .enablePlugins(SbtPlugin, BuildInfoPlugin)
     .settings(commonSettings)
     .settings(
@@ -27,7 +27,7 @@ val `sbt-scalajs-bundler` =
     )
 
 val `sbt-web-scalajs-bundler` =
-  project.in(file("sbt-web-scalajs-bundler"))
+  project
     .enablePlugins(SbtPlugin)
     .settings(commonSettings)
     .settings(
@@ -65,7 +65,7 @@ val apiDoc =
 val ornateTarget = Def.setting(target.value / "ornate")
 
 val manual =
-  project.in(file("manual"))
+  project
     .enablePlugins(OrnatePlugin)
     .settings(noPublishSettings: _*)
     .settings(
