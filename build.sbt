@@ -1,4 +1,6 @@
-val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.3.0")
+ThisBuild / version := "0.21.0-RC1+0-SNAPSHOT"
+
+val scalaJSVersion = sys.env.getOrElse("SCALAJS_VERSION", "1.7.0")
 
 lazy val `scalajs-bundler-linker` =
     project
